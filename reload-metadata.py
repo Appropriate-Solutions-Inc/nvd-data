@@ -1,10 +1,7 @@
-"""Load all metadata in the ./data directory into a SQLite3 database.
-
-
-"""
+"""Load all metadata in the ./data directory into a SQLite3 database."""
 # Copyright © 2023 Appropriate Solutions, Inc. All rights reserved.
 
-import csv
+from datetime import datetime
 from pathlib import Path
 import sqlite3
 
@@ -29,6 +26,15 @@ def recreate_db(conn) -> None:
     conn.commit()
 
 
+def parse_datetime(date_time: str) -> datetime:
+    """Parse 2023-08-04T03:01:58-04:00 into Python date/time.
+
+    Trim off the trailing :00.
+    """
+    dt = datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%S%z")
+    return dt
+
+
 def load_metadata(conn) -> None:
     """Load all metadata into the database."""
     cur = conn.cursor()
@@ -39,6 +45,9 @@ def load_metadata(conn) -> None:
         for line in meta_path.read_text().splitlines():
             els = line.split(":")
             data.append(":".join(els[1:]))
+
+        # data[1] is lastModifiedDate
+        data[1] = parse_datetime(data[1])
 
         cur.execute(
             "INSERT INTO meta "

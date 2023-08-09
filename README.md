@@ -2,10 +2,15 @@
 
 Python project to manage files from the NIST NVD data feed.
 
-NOTE: This is a quick toss-away project as the NVD
-[data feeds](https://nvd.nist.gov/vuln/data-feeds)
-are being retired on 2023-12-15.
+NOTE: This is a quick toss-away project as the NVD batch data feeds are being retired on 2023-12-15.
 
+## URLs
+- Batch [data feeds](https://nvd.nist.gov/vuln/data-feeds)
+- [Vulnerabilities](https://nvd.nist.gov/developers/vulnerabilities)
+  - cveId
+  - lastModStartDate
+  - lastModEndDate
+- [Data Source](https://nvd.nist.gov/developers/data-sources)
 
 ## Installation
 - Requires Poetry
@@ -30,10 +35,8 @@ python csv-all.py
 ```
 
 
-### Load metadata
-Load all metadata files into a SQLite3 database.
-
-Only do this one time.
+### Re-load metadata
+Tear down the existing metadata database and reload from the `.meta` files
 
 ```bash
 python load_metadata.py

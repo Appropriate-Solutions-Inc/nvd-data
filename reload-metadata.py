@@ -1,4 +1,7 @@
-"""Load all metadata in the ./data directory into a SQLite3 databse."""
+"""Load all metadata in the ./data directory into a SQLite3 database.
+
+
+"""
 # Copyright © 2023 Appropriate Solutions, Inc. All rights reserved.
 
 import csv
@@ -12,17 +15,16 @@ db_dir.mkdir(exist_ok=True)
 db_path = db_dir / "nvd-metadata.db"
 
 
-def create_db(conn) -> None:
-    """Create the database.
-
-    Safe to call on each invocation.
-    The lastModifiedDate is likely the only thing we'll use.
-    """
+def recreate_db(conn) -> None:
+    """Re-create the database."""
     cur = conn.cursor()
+    cur.execute("DROP TABLE IF EXISTS meta;")
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS meta(importable, last_modified_date, file_size, zip_size, gz_size, sha256)"
+        "CREATE TABLE IF NOT EXISTS meta "
+        "(importable, last_modified_date, file_size, zip_size, gz_size, sha256, "
+        "needs_update INTEGER DEFAULT 0 NOT NULL);"
     )
-    cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_cve_id ON meta (importable)")
+    cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_cve_id ON meta (importable);")
     cur.close()
     conn.commit()
 
@@ -49,5 +51,5 @@ def load_metadata(conn) -> None:
 
 
 conn = sqlite3.connect(db_path)
-create_db(conn)
+recreate_db(conn)
 load_metadata(conn)

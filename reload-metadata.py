@@ -27,10 +27,7 @@ def recreate_db(conn: sqlite3.Connection) -> None:
 
 
 def parse_datetime(date_time: str) -> datetime:
-    """Parse 2023-08-04T03:01:58-04:00 into Python date/time.
-
-    Trim off the trailing :00.
-    """
+    """Parse 2023-08-04T03:01:58-04:00 into Python date/time."""
     dt = datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%S%z")
     return dt
 

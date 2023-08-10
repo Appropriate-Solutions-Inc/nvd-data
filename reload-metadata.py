@@ -12,7 +12,7 @@ db_dir.mkdir(exist_ok=True)
 db_path = db_dir / "nvd-metadata.db"
 
 
-def recreate_db(conn) -> None:
+def recreate_db(conn: sqlite3.Connection) -> None:
     """Re-create the database."""
     cur = conn.cursor()
     cur.execute("DROP TABLE IF EXISTS meta;")
@@ -35,7 +35,7 @@ def parse_datetime(date_time: str) -> datetime:
     return dt
 
 
-def load_metadata(conn) -> None:
+def load_metadata(conn: sqlite3.Connection) -> None:
     """Load importable and meta data into the database.
 
     - Parse lastModifiedDate as datetime with timezone offset.

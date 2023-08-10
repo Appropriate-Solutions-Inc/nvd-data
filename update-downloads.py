@@ -26,6 +26,7 @@ Add API key to header during requests.
 """
 # Copyright © 2023 Appropriate Solutions, Inc. All rights reserved.
 
+from datetime import datetime
 import os
 from pathlib import Path
 import sqlite3
@@ -47,10 +48,19 @@ if api_key:
     api_sleep = 0.7
 
 
-def importables_to_check(conn) -> list[str]:
-    """Find importables where `needs_update` is 0."""
+def all_importables(conn: sqlite3.Connection) -> list[str]:
+    """Return sorted list of importables."""
     cur = conn.cursor()
-    cur.execute("SELECT importable FROM meta WHERE needs_update=0")
+    cur.execute("SELECT importable FROM meta;")
+    importables = [x[0] for x in cur.fetchall()]
+    importables.sort()
+    return importables
+
+
+def importables_to_check(conn: sqlite3.Connection) -> list[str]:
+    """Return sorted list of importables where `needs_update` is 0."""
+    cur = conn.cursor()
+    cur.execute("SELECT importable FROM meta WHERE needs_update=0;")
     importables = [x[0] for x in cur.fetchall()]
     importables.sort()
     return importables
@@ -87,6 +97,53 @@ def download_metas(importables: list[str]) -> None:
         file_path.write_text(meta)
 
 
+def load_meta_modified_date(path: Path) -> datetime:
+    """Load lastModifiedDate from .meta file."""
+    els = path.read_bytes().splitlines()[0].decode("utf-8").split(":")
+    mod_date = ":".join(els[1:])
+    return datetime.strptime(mod_date, "%Y-%m-%dT%H:%M:%S%z")
+
+
+def get_stored_modified_date(conn: sqlite3.Connection, name: str) -> datetime:
+    """Load last_modified_date from meta table."""
+    cur = conn.cursor()
+    cur.execute("SELECT last_modified_date FROM meta WHERE importable=?", [name])
+    mod_date = cur.fetchone()[0]
+    return datetime.strptime(mod_date, "%Y-%m-%d %H:%M:%S%z")
+
+
+def set_needs_update(conn: sqlite3.Connection, importable: str):
+    """Set `needs_update` to 1 (true) in meta table for importable."""
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE meta SET needs_update=1 WHERE importable=?;",
+        [importable],
+    )
+    conn.commit()
+
+
+def check_metadata(conn: sqlite3.Connection):
+    """Flag new metadata files.
+
+    Compare meta file lastModifiedDate against database.
+    Set `needs_update` to 1 (true) if date is newer.
+    """
+    modified_count = 0
+    for importable in all_importables(conn):
+        name = f"{importable}.meta"
+        path = data_dir / name
+        print(f"Checking meta data for: {importable}.")
+        file_date = load_meta_modified_date(path)
+        db_date = get_stored_modified_date(conn, importable)
+
+        if file_date > db_date:
+            print(f"{importable} needs update.")
+            set_needs_update(conn, importable)
+            modified_count += 1
+
+    print(f"Number of modified files: {modified_count}.")
+
+
 def main():
     conn = sqlite3.connect(db_path)
     if not (importables := importables_to_check(conn)):
@@ -94,7 +151,9 @@ def main():
         sys.exit(0)
 
     print(f"Number of importables to process: {len(importables)}.")
-    download_metas(importables)
+    # RGAC!! download_metas(importables)
+
+    check_metadata(conn)
 
 
 if __name__ == "__main__":

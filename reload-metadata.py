@@ -36,7 +36,10 @@ def parse_datetime(date_time: str) -> datetime:
 
 
 def load_metadata(conn) -> None:
-    """Load all metadata into the database."""
+    """Load importable and meta data into the database.
+
+    - Parse lastModifiedDate as datetime with timezone offset.
+    """
     cur = conn.cursor()
 
     for meta_path in data_dir.glob("*.meta"):

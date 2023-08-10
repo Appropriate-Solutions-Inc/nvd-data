@@ -1,4 +1,10 @@
-"""Load all metadata in the ./data directory into a SQLite3 database."""
+"""Load all metadata in the ./data directory into a SQLite3 database.
+
+   Loading recent.json.gz and modified.json.gz is redundant, 
+   but we're only doing this until December and it is not worth 
+   digging into the data to ensure coverage.
+
+"""
 # Copyright © 2023 Appropriate Solutions, Inc. All rights reserved.
 
 from datetime import datetime

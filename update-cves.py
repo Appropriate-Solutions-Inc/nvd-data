@@ -1,21 +1,21 @@
 """Update downloads based on metadata information.
 
-Don't run more than once every two hours. 
+Don't run more than once every two hours.
 Daily is probably sufficient.
 
 Add API key to header during requests.
 
 - Phase 1:
   - Find all meta importable's where needs_update is 0.
-  - Download new meta files. 
+  - Download new meta files.
   - See if lastModifiedDate is newer.
     - No: Keep going.
-    - Yes: 
+    - Yes:
       - Save Meta file.
       - Download data file.
       - Update database metadata.
       - Set needs_update to 1.
-- Phase 2: 
+- Phase 2:
   - Find all importable's with needs_update 1.
     - Import/update data.
     - Set needs_update to 0.
@@ -173,7 +173,7 @@ def main():
         conn, "SELECT importable FROM meta WHERE needs_update=?;", [0]
     )
     print(f"Number of metas to check: {len(checkables)}.")
-    # RGAC!! download_metas(checkables)
+    download_metas(checkables)
 
     check_metadata(conn)
     download_cves(conn)

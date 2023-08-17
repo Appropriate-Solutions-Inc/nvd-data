@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Flatten all data files in the ./data directory."""
 # Copyright © 2023 Appropriate Solutions, Inc. All rights reserved.
 

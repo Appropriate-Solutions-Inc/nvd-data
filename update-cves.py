@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Update downloads based on metadata information.
 
 Don't run more than once every two hours.

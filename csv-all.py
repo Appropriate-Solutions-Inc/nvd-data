@@ -24,6 +24,9 @@ with open(output_path, "w", newline="") as csvfile:
     csv_writer.writerow(["cve_id", "cve"])
 
     for gz_path in (Path(".") / "data").glob("*.json.gz"):
+        if "recent" in gz_path.name or "modified" in gz_path.name:
+            # Including them creates duplicates.
+            continue
         print(f"Processing: {gz_path}")
         with gzip.open(gz_path) as ungz_path:
             cves = json.load(ungz_path)
